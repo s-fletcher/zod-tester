@@ -7,6 +7,7 @@ import { Button } from "./components/ui/button";
 const EditorOptions: EditorProps["options"] = {
   renderLineHighlightOnlyWhenFocus: true,
   folding: false,
+  hover: { enabled: false },
   minimap: { enabled: false },
   quickSuggestions: { other: false, comments: false, strings: false },
   parameterHints: { enabled: false },
