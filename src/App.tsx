@@ -154,14 +154,24 @@ function App() {
             {result}
           </div>
         </div>
-        <a
-          href="https://zod.dev/"
-          target="_blank"
-          rel="noreferrer"
-          className="mx-auto text-zinc-400 underline text-sm"
-        >
-          Zod documentation
-        </a>
+        <div className="mx-auto flex flex-col gap-2">
+          <a
+            href="https://zod.dev/"
+            target="_blank"
+            rel="noreferrer"
+            className="mx-auto text-zinc-400 underline text-sm"
+          >
+            Zod documentation
+          </a>
+          <a
+            href="https://github.com/s-fletcher/zod-tester/"
+            target="_blank"
+            rel="noreferrer"
+            className="mx-auto text-zinc-400 underline text-sm"
+          >
+            Github repository
+          </a>
+        </div>
       </div>
     </div>
   );
