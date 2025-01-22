@@ -4,6 +4,9 @@ import { ZodSchema, z } from "zod";
 import { cn } from "./lib/utils";
 import { Button } from "./components/ui/button";
 import { MdDarkMode, MdLightMode } from "react-icons/md";
+import { useQueryState } from "nuqs";
+import LZString from "lz-string";
+import { useToast } from "./components/ui/use-toast";
 
 const EditorOptions: EditorProps["options"] = {
   renderLineHighlightOnlyWhenFocus: true,
@@ -22,14 +25,35 @@ const EditorOptions: EditorProps["options"] = {
 
 type Theme = "dark" | "light" | "system";
 
+const defaultSchema = "z.object({\n    key: z.string()\n})";
+const defaultJson = `{\n    "key": "value"\n}`;
+const defaultResult = "";
+
+const parse = (value: string) => LZString.decompressFromBase64(value);
+const serialize = (value: string) => LZString.compressToBase64(value);
+
 function App() {
-  const [schema, setSchema] = useState("z.object({\n    key: z.string()\n})");
-  const [json, setJson] = useState(`{\n    "key": "value"\n}`);
-  const [result, setResult] = useState("");
+  const [schema, setSchema] = useQueryState("schema", {
+    parse,
+    serialize,
+    defaultValue: defaultSchema,
+  });
+  const [json, setJson] = useQueryState("json", {
+    parse,
+    serialize,
+    defaultValue: defaultJson,
+  });
+  const [result, setResult] = useQueryState("result", {
+    parse,
+    serialize,
+    defaultValue: defaultResult,
+  });
   const [isError, setIsError] = useState(false);
   const [theme, setTheme] = useState<Theme>(
     () => (localStorage.getItem("ui-theme") as Theme) || "system"
   );
+    const { toast } = useToast()
+
 
   const isDark = useMemo(() => {
     if (theme === "system") {
@@ -128,19 +152,44 @@ function App() {
             />
           </div>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={onValidate} className="w-full" variant="default">
-            Validate
-          </Button>
-          <Button
-            onClick={() => {
-              const newTheme = isDark ? "light" : "dark";
-              localStorage.setItem("ui-theme", newTheme);
-              setTheme(newTheme);
-            }}
-          >
-            {isDark ? <MdLightMode /> : <MdDarkMode />}
-          </Button>
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-2">
+            <Button onClick={onValidate} className="w-full" variant="default">
+              Validate
+            </Button>
+            <Button
+              onClick={() => {
+                const newTheme = isDark ? "light" : "dark";
+                localStorage.setItem("ui-theme", newTheme);
+                setTheme(newTheme);
+              }}
+            >
+              {isDark ? <MdLightMode /> : <MdDarkMode />}
+            </Button>
+          </div>
+          <div className="flex flex-row flex-grow gap-2">
+            <Button
+            variant="outline"
+              className="flex-grow"
+              onClick={() => {
+                setSchema(defaultSchema);
+                setJson(defaultJson);
+                setResult(defaultResult);
+              }}
+            >
+              Reset
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-grow"
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+                toast({ description: "Link copied to clipboard", duration: 3000 });
+              }}
+            >
+              Share
+            </Button>
+          </div>
         </div>
         <div>
           <h1 className="font-bold text-lg mb-2">Result:</h1>
