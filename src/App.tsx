@@ -52,8 +52,7 @@ function App() {
   const [theme, setTheme] = useState<Theme>(
     () => (localStorage.getItem("ui-theme") as Theme) || "system"
   );
-    const { toast } = useToast()
-
+  const { toast } = useToast();
 
   const isDark = useMemo(() => {
     if (theme === "system") {
@@ -169,7 +168,7 @@ function App() {
           </div>
           <div className="flex flex-row flex-grow gap-2">
             <Button
-            variant="outline"
+              variant="outline"
               className="flex-grow"
               onClick={() => {
                 setSchema(defaultSchema);
@@ -184,7 +183,10 @@ function App() {
               className="flex-grow"
               onClick={() => {
                 navigator.clipboard.writeText(window.location.href);
-                toast({ description: "Link copied to clipboard", duration: 3000 });
+                toast({
+                  description: "Link copied to clipboard",
+                  duration: 3000,
+                });
               }}
             >
               Share
