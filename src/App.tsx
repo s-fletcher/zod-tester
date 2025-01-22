@@ -91,6 +91,12 @@ function App() {
           content: `declare namespace z{${zodDeclaration}}`,
         },
       ]);
+      // window.onresize = () => {
+      //   console.log("resized");
+      //   monaco.editor.getEditors().forEach((editor) => {
+      //     editor.layout();
+      //   });
+      // };
     });
   }, []);
 
@@ -136,31 +142,31 @@ function App() {
       )}
     >
       <div className="flex flex-col gap-8 w-full max-w-screen-lg mx-auto px-4 p-10 relative">
-        <div className="flex gap-4 w-full items-center justify-center">
-          <div className="w-full max-w-[600px]">
-            <h1 className="font-bold text-lg mb-2">Zod Schema:</h1>
-            <Editor
-              value={schema}
-              onChange={(val) => setSchema(val ?? "")}
-              height="400px"
-              className="border rounded-md"
-              options={EditorOptions}
-              theme={isDark ? "vs-dark" : "light"}
-              defaultLanguage="typescript"
-            />
-          </div>
-          <div className="w-full max-w-[600px]">
-            <h1 className="font-bold text-lg mb-2">JSON to Validate:</h1>
-            <Editor
-              value={json}
-              onChange={(val) => setJson(val ?? "")}
-              height="400px"
-              className="border rounded-md"
-              options={EditorOptions}
-              theme={isDark ? "vs-dark" : "light"}
-              defaultLanguage="json"
-            />
-          </div>
+        <div className="flex flex-col sm:flex-row gap-4 w-full items-center justify-center  [&_.monaco-editor]:absolute">
+            <div className="w-full">
+              <h1 className="font-bold text-lg mb-2">Zod Schema:</h1>
+              <Editor
+                value={schema}
+                onChange={(val) => setSchema(val ?? "")}
+                height="400px"
+                className="border rounded-md"
+                options={EditorOptions}
+                theme={isDark ? "vs-dark" : "light"}
+                defaultLanguage="typescript"
+              />
+            </div>
+            <div className="w-full">
+              <h1 className="font-bold text-lg mb-2">JSON to Validate:</h1>
+              <Editor
+                value={json}
+                onChange={(val) => setJson(val ?? "")}
+                height="400px"
+                className="border rounded-md"
+                options={EditorOptions}
+                theme={isDark ? "vs-dark" : "light"}
+                defaultLanguage="json"
+              />
+            </div>
         </div>
         <div className="flex flex-col gap-2">
           <div className="flex gap-2">
