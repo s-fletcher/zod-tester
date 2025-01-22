@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import Editor, { EditorProps } from "@monaco-editor/react";
+import Editor, { EditorProps, loader } from "@monaco-editor/react";
 import { ZodSchema, z } from "zod";
 import { cn } from "./lib/utils";
 import { Button } from "./components/ui/button";
@@ -7,20 +7,16 @@ import { MdDarkMode, MdLightMode } from "react-icons/md";
 import { useQueryState } from "nuqs";
 import LZString from "lz-string";
 import { useToast } from "./components/ui/use-toast";
+import { zodDeclaration } from "./lib/zod-declaration";
 
 const EditorOptions: EditorProps["options"] = {
   renderLineHighlightOnlyWhenFocus: true,
   folding: false,
-  hover: { enabled: false },
   minimap: { enabled: false },
-  quickSuggestions: { other: false, comments: false, strings: false },
-  parameterHints: { enabled: false },
-  suggestOnTriggerCharacters: false,
-  acceptSuggestionOnEnter: "off",
-  tabCompletion: "off",
-  wordBasedSuggestions: "off",
-  inlineSuggest: { enabled: false },
   contextmenu: false,
+  formatOnPaste: true,
+  formatOnType: true,
+  automaticLayout: true,
 };
 
 type Theme = "dark" | "light" | "system";
@@ -83,6 +79,20 @@ function App() {
     root.classList.add(theme);
   }, [theme]);
 
+  useEffect(() => {
+    loader.init().then((monaco) => {
+      monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+        noSemanticValidation: true,
+        noSyntaxValidation: true,
+      });
+      monaco.languages.typescript.typescriptDefaults.setExtraLibs([
+        {
+          content: `declare namespace z{${zodDeclaration}}`,
+        },
+      ]);
+    });
+  }, []);
+
   const onValidate = () => {
     try {
       // eslint-disable-next-line no-new-func
@@ -135,7 +145,7 @@ function App() {
               className="border rounded-md"
               options={EditorOptions}
               theme={isDark ? "vs-dark" : "light"}
-              defaultLanguage="javascript"
+              defaultLanguage="typescript"
             />
           </div>
           <div className="w-full max-w-[600px]">
