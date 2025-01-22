@@ -16,6 +16,7 @@ const EditorOptions: EditorProps["options"] = {
   contextmenu: false,
   formatOnPaste: true,
   formatOnType: true,
+  scrollBeyondLastLine: false,
   automaticLayout: true,
 };
 
