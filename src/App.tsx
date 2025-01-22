@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import Editor, { EditorProps, loader } from "@monaco-editor/react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import Editor, { EditorProps, loader, Monaco } from "@monaco-editor/react";
 import { ZodSchema, z } from "zod";
 import { cn } from "./lib/utils";
 import { Button } from "./components/ui/button";
@@ -30,6 +30,7 @@ const parse = (value: string) => LZString.decompressFromBase64(value);
 const serialize = (value: string) => LZString.compressToBase64(value);
 
 function App() {
+  const [instance, setInstance] = useState<Monaco>();
   const [schema, setSchema] = useQueryState("schema", {
     parse,
     serialize,
@@ -82,6 +83,7 @@ function App() {
 
   useEffect(() => {
     loader.init().then((monaco) => {
+      setInstance(monaco);
       monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
         noSemanticValidation: true,
         noSyntaxValidation: true,
@@ -91,16 +93,10 @@ function App() {
           content: `declare namespace z{${zodDeclaration}}`,
         },
       ]);
-      // window.onresize = () => {
-      //   console.log("resized");
-      //   monaco.editor.getEditors().forEach((editor) => {
-      //     editor.layout();
-      //   });
-      // };
     });
   }, []);
 
-  const onValidate = () => {
+  const onValidate = useCallback(() => {
     try {
       // eslint-disable-next-line no-new-func
       const fun = new Function(
@@ -132,7 +128,25 @@ function App() {
         error instanceof Error ? error.message : "An unknown error occurred."
       );
     }
-  };
+  }, [schema, json, setResult]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        instance?.editor.getEditors().forEach((editor) => {
+          editor.getAction("editor.action.formatDocument")?.run();
+        });
+        onValidate();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [instance, onValidate]);
 
   return (
     <div
@@ -172,6 +186,23 @@ function App() {
           <div className="flex gap-2">
             <Button onClick={onValidate} className="w-full" variant="default">
               Validate
+              <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-0.5 px-2 font-mono text-xs font-medium text-muted-foreground opacity-100">
+                <svg
+                  className="shrink-0 size-3"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3"></path>
+                </svg>
+                <span>S</span>
+              </kbd>
             </Button>
             <Button
               onClick={() => {
