@@ -13,9 +13,7 @@ const EditorOptions: EditorProps["options"] = {
   renderLineHighlightOnlyWhenFocus: true,
   folding: false,
   minimap: { enabled: false },
-  scrollbar: {
-    alwaysConsumeMouseWheel: false
-  },
+  scrollbar: { alwaysConsumeMouseWheel: false },
   contextmenu: false,
   formatOnPaste: true,
   formatOnType: true,
