@@ -37,6 +37,10 @@ export function ZodVersionProvider({ children }: { children: ReactNode }) {
       );
       return await res.text();
     },
+    staleTime: 1000 * 60 * 60 * 24,
+    refetchOnWindowFocus: false,
+    refetchInterval: false,
+    refetchOnMount: false,
   });
 
   useEffect(() => {

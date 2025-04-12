@@ -31,6 +31,9 @@ export const useZodVersions = () => {
       return await res.json();
     },
     staleTime: 1000 * 60 * 60 * 24,
+    refetchOnWindowFocus: false,
+    refetchInterval: false,
+    refetchOnMount: false,
   });
 
   const versions = useMemo(() => {
