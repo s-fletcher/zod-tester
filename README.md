@@ -4,7 +4,7 @@
 
 Test your Zod schemas online [zod.samfletcher.me](https://zod.samfletcher.me)
 
-![CleanShot 2024-02-15 at 17 08 16](https://github.com/s-fletcher/zod-tester/assets/11020347/25cc50e9-e7a3-4f9a-b8c3-4583095b333f)
+![CleanShot 2025-04-12 at 00 08 47](https://github.com/user-attachments/assets/b9a8ba31-c1fc-4b30-a274-bc4bbeb8eaf1)
 
 -----
 
