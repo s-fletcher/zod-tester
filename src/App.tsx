@@ -6,9 +6,8 @@ import { MdDarkMode, MdLightMode } from "react-icons/md";
 import { useQueryState } from "nuqs";
 import LZString from "lz-string";
 import { useToast } from "./components/ui/use-toast";
-import { zodDeclaration } from "./lib/zod-declaration";
 import { ZodVersionSelector } from "./components/zod-version-selector";
-import { module } from "./contexts/ZodVersionContext";
+import { module, useZodVersionContext } from "./contexts/ZodVersionContext";
 
 const EditorOptions: EditorProps["options"] = {
   renderLineHighlightOnlyWhenFocus: true,
@@ -32,6 +31,7 @@ const parse = (value: string) => LZString.decompressFromBase64(value);
 const serialize = (value: string) => LZString.compressToBase64(value);
 
 function App() {
+  const { declarations } = useZodVersionContext();
   const [instance, setInstance] = useState<Monaco>();
   const [schema, setSchema] = useQueryState("schema", {
     parse,
@@ -90,13 +90,15 @@ function App() {
         noSemanticValidation: true,
         noSyntaxValidation: true,
       });
-      monaco.languages.typescript.typescriptDefaults.setExtraLibs([
-        {
-          content: `declare namespace z{${zodDeclaration}}`,
-        },
-      ]);
     });
   }, []);
+
+  useEffect(() => {
+    if (!instance) return;
+    instance?.languages.typescript.typescriptDefaults.setExtraLibs([
+      { content: `declare namespace z{${declarations}}` },
+    ]);
+  }, [!!instance, declarations]);
 
   const onValidate = useCallback(() => {
     try {
@@ -169,7 +171,7 @@ function App() {
             />
           </div>
           <div className="w-full">
-            <h1 className="font-bold text-lg mb-2">JSON to Validate</h1>
+            <h1 className="font-bold text-lg mb-2">JSON</h1>
             <Editor
               value={json}
               onChange={(val) => setJson(val ?? "")}
