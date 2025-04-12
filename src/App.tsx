@@ -31,7 +31,7 @@ const parse = (value: string) => LZString.decompressFromBase64(value);
 const serialize = (value: string) => LZString.compressToBase64(value);
 
 function App() {
-  const { declarations } = useZodVersionContext();
+  const { declarations, version } = useZodVersionContext();
   const [instance, setInstance] = useState<Monaco>();
   const [schema, setSchema] = useQueryState("schema", {
     parse,
@@ -256,7 +256,11 @@ function App() {
         </div>
         <div className="mx-auto flex flex-col gap-2">
           <a
-            href="https://zod.dev/"
+            href={
+              version.startsWith("4.")
+                ? `https://v4.zod.dev/`
+                : "https://zod.dev/"
+            }
             target="_blank"
             rel="noreferrer"
             className="mx-auto text-zinc-400 underline text-sm"
