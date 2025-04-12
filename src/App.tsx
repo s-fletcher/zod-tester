@@ -8,6 +8,8 @@ import { useQueryState } from "nuqs";
 import LZString from "lz-string";
 import { useToast } from "./components/ui/use-toast";
 import { zodDeclaration } from "./lib/zod-declaration";
+import { useZodVersions } from "./hooks/useZodVersions";
+import { ZodVersionSelector } from "./components/zod-version-selector";
 
 const EditorOptions: EditorProps["options"] = {
   renderLineHighlightOnlyWhenFocus: true,
@@ -159,7 +161,10 @@ function App() {
       <div className="flex flex-col gap-8 w-full max-w-(--breakpoint-lg) mx-auto px-4 p-10 relative">
         <div className="flex flex-col sm:flex-row gap-4 w-full items-center justify-center  [&_.monaco-editor]:absolute">
           <div className="w-full">
-            <h1 className="font-bold text-lg mb-2">Zod Schema:</h1>
+            <div className="flex flex-row gap-2 items-center mb-2">
+              <h1 className="font-bold text-lg">Zod Schema</h1>
+              <ZodVersionSelector />
+            </div>
             <Editor
               value={schema}
               onChange={(val) => setSchema(val ?? "")}
@@ -171,7 +176,7 @@ function App() {
             />
           </div>
           <div className="w-full">
-            <h1 className="font-bold text-lg mb-2">JSON to Validate:</h1>
+            <h1 className="font-bold text-lg mb-2">JSON to Validate</h1>
             <Editor
               value={json}
               onChange={(val) => setJson(val ?? "")}
