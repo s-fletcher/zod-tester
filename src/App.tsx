@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Editor, { EditorProps, loader, Monaco } from "@monaco-editor/react";
-import { ZodSchema, z } from "zod";
 import { cn } from "./lib/utils";
 import { Button } from "./components/ui/button";
 import { MdDarkMode, MdLightMode } from "react-icons/md";
@@ -8,8 +7,8 @@ import { useQueryState } from "nuqs";
 import LZString from "lz-string";
 import { useToast } from "./components/ui/use-toast";
 import { zodDeclaration } from "./lib/zod-declaration";
-import { useZodVersions } from "./hooks/useZodVersions";
 import { ZodVersionSelector } from "./components/zod-version-selector";
+import { module } from "./contexts/ZodVersionContext";
 
 const EditorOptions: EditorProps["options"] = {
   renderLineHighlightOnlyWhenFocus: true,
@@ -101,7 +100,6 @@ function App() {
 
   const onValidate = useCallback(() => {
     try {
-      // eslint-disable-next-line no-new-func
       const fun = new Function(
         "z",
         "zod",
@@ -111,20 +109,15 @@ function App() {
             : schema.trim()
         })`
       );
-      const zodSchema = fun(z, z);
-      if (zodSchema instanceof ZodSchema) {
-        const result = zodSchema.safeParse(JSON.parse(json));
-        if (!result.success) {
-          setIsError(true);
-          setResult(JSON.stringify(result.error, undefined, 4));
-          return;
-        }
-        setResult(JSON.stringify(result.data, undefined, 4));
-        setIsError(false);
-      } else {
+      const zodSchema = fun(module, module);
+      const result = zodSchema.safeParse(JSON.parse(json));
+      if (!result.success) {
         setIsError(true);
-        setResult("Input is not an instance of `ZodSchema`");
+        setResult(JSON.stringify(result.error, undefined, 4));
+        return;
       }
+      setResult(JSON.stringify(result.data, undefined, 4));
+      setIsError(false);
     } catch (error) {
       setIsError(true);
       setResult(

@@ -18,6 +18,10 @@ import { useZodVersionContext } from "../contexts/ZodVersionContext";
 import { PopoverProps } from "@radix-ui/react-popover";
 import { Skeleton } from "./ui/skeleton";
 
+const cleanVersion = (version: string) => {
+  return version.replace(/([a-z]+)\..*/, "$1");
+};
+
 export function ZodVersionSelector(props: PopoverProps) {
   const { version, versions, isLoading, setVersion } = useZodVersionContext();
   const [open, setOpen] = React.useState(false);
@@ -35,7 +39,7 @@ export function ZodVersionSelector(props: PopoverProps) {
           {isLoading ? (
             <Skeleton className="w-[100px] h-2" />
           ) : version ? (
-            versions.find((v) => v === version)
+            cleanVersion(versions.find((v) => v === version) ?? "")
           ) : (
             "Select version..."
           )}
@@ -63,7 +67,7 @@ export function ZodVersionSelector(props: PopoverProps) {
                       version === v ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {v}
+                  {cleanVersion(v)}
                 </CommandItem>
               ))}
             </CommandGroup>

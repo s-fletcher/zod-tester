@@ -23,10 +23,6 @@ type ZodMetadataResponse = {
   tags: ZodTags;
 };
 
-const cleanVersion = (version: string) => {
-  return version.replace(/([a-z]+)\..*/, "$1");
-};
-
 export const useZodVersions = () => {
   const { data, ...rest } = useQuery<ZodMetadataResponse>({
     queryKey: ["zod-versions"],
@@ -38,27 +34,24 @@ export const useZodVersions = () => {
   });
 
   const versions = useMemo(() => {
-    return data?.versions
-      .filter(({ version }) => {
-        if (Object.values(data.tags).includes(version)) {
-          return true;
-        }
-        if (Object.keys(data.tags).some((tag) => version.includes(tag))) {
-          return false;
-        }
+    return data?.versions.filter(({ version }) => {
+      if (Object.values(data.tags).includes(version)) {
         return true;
-      })
-      .map(({ version, links }) => ({
-        version: cleanVersion(version),
-        links,
-      }));
+      }
+      if (Object.keys(data.tags).some((tag) => version.includes(tag))) {
+        return false;
+      }
+      // 1.x versions are not supported due to outdated api
+      if (version.startsWith("1.")) {
+        return false;
+      }
+      return true;
+    });
   }, [data]);
 
   return {
     ...rest,
     data: versions,
-    latest: versions?.find(
-      ({ version }) => version === cleanVersion(data?.tags.latest ?? "")
-    ),
+    latest: versions?.find(({ version }) => version === data?.tags.latest),
   };
 };
