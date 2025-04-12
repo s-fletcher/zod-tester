@@ -156,7 +156,7 @@ function App() {
         isDark ? "dark" : ""
       )}
     >
-      <div className="flex flex-col gap-8 w-full max-w-screen-lg mx-auto px-4 p-10 relative">
+      <div className="flex flex-col gap-8 w-full max-w-(--breakpoint-lg) mx-auto px-4 p-10 relative">
         <div className="flex flex-col sm:flex-row gap-4 w-full items-center justify-center  [&_.monaco-editor]:absolute">
           <div className="w-full">
             <h1 className="font-bold text-lg mb-2">Zod Schema:</h1>
@@ -215,10 +215,10 @@ function App() {
               {isDark ? <MdLightMode /> : <MdDarkMode />}
             </Button>
           </div>
-          <div className="flex flex-row flex-grow gap-2">
+          <div className="flex flex-row grow gap-2">
             <Button
               variant="outline"
-              className="flex-grow"
+              className="grow"
               onClick={() => {
                 setSchema(defaultSchema);
                 setJson(defaultJson);
@@ -229,7 +229,7 @@ function App() {
             </Button>
             <Button
               variant="outline"
-              className="flex-grow"
+              className="grow"
               onClick={() => {
                 navigator.clipboard.writeText(window.location.href);
                 toast({
