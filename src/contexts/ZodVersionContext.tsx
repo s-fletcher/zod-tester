@@ -31,6 +31,9 @@ const getTypeFilePaths = (files: FileMeta[], path = ""): string[] => {
   });
 };
 
+const cdnUrl = "https://cdn.jsdelivr.net";
+const dataUrl = "https://data.jsdelivr.com";
+
 export function ZodVersionProvider({ children }: { children: ReactNode }) {
   const { data: versions, latest, isLoading } = useZodVersions();
   const [overriddenVersion, setOverriddenVersion] = useQueryState("version");
@@ -38,9 +41,7 @@ export function ZodVersionProvider({ children }: { children: ReactNode }) {
   const { data: declarationPaths } = useQuery({
     queryKey: ["zod-declaration-paths", version],
     queryFn: async () => {
-      const res = await fetch(
-        `https://data.jsdelivr.com/v1/packages/npm/zod@${version}`
-      );
+      const res = await fetch(`${dataUrl}/v1/packages/npm/zod@${version}`);
       const files: FileMeta[] = (await res.json()).files;
       return getTypeFilePaths(files);
     },
@@ -50,14 +51,12 @@ export function ZodVersionProvider({ children }: { children: ReactNode }) {
     refetchOnMount: false,
   });
 
-  const data = useQueries({
+  const declarations = useQueries({
     queries:
       declarationPaths?.map((path) => ({
         queryKey: ["zod-declaration", version, path],
         queryFn: async () => {
-          const res = await fetch(
-            `https://cdn.jsdelivr.net/npm/zod@${version}/${path}`
-          );
+          const res = await fetch(`${cdnUrl}/npm/zod@${version}/${path}`);
           return await res.text();
         },
         staleTime: 1000 * 60 * 60 * 24,
@@ -65,11 +64,17 @@ export function ZodVersionProvider({ children }: { children: ReactNode }) {
         refetchInterval: false,
         refetchOnMount: false,
       })) ?? [],
+    combine: (results) => {
+      return results
+        .map(({ data }) => data)
+        .filter(Boolean)
+        .join("\n");
+    },
   });
 
   useEffect(() => {
     async function main() {
-      module = await import(`https://cdn.jsdelivr.net/npm/zod@${version}/+esm`);
+      module = await import(`${cdnUrl}/npm/zod@${version}/+esm`);
     }
     main();
   }, [version]);
@@ -79,11 +84,7 @@ export function ZodVersionProvider({ children }: { children: ReactNode }) {
       value={{
         version,
         isLoading,
-        declarations:
-          data
-            ?.map((result) => result.data)
-            .filter(Boolean)
-            .join("\n") ?? "",
+        declarations,
         versions: versions?.map((v) => v.version) ?? [],
         setVersion: setOverriddenVersion,
       }}
