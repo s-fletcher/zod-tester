@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { createContext, useContext, useEffect } from "react";
 import { useZodVersions } from "../hooks/useZodVersions";
 import { useQueryState } from "nuqs";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 
 type ZodVersionContextValue = {
   version: string;
@@ -18,29 +18,53 @@ const ZodVersionContext = createContext<ZodVersionContextValue | undefined>(
   undefined
 );
 
+type FileMeta = {
+  name: string;
+  files?: FileMeta[];
+};
+
+const getTypeFilePaths = (files: FileMeta[], path = ""): string[] => {
+  return files.flatMap((file) => {
+    if (file.name.endsWith(".d.ts")) return [`${path}${file.name}`];
+    if (file.files) return getTypeFilePaths(file.files, `${path}${file.name}/`);
+    return [];
+  });
+};
+
 export function ZodVersionProvider({ children }: { children: ReactNode }) {
   const { data: versions, latest, isLoading } = useZodVersions();
   const [overriddenVersion, setOverriddenVersion] = useQueryState("version");
   const version = overriddenVersion ?? latest?.version ?? "3.24.2";
-  const { data: declarations } = useQuery({
-    queryKey: ["zod-declaration", version],
+  const { data: declarationPaths } = useQuery({
+    queryKey: ["zod-declaration-paths", version],
     queryFn: async () => {
-      // 4.x versions export types differently
-      if (version.startsWith("4.")) {
-        const res = await fetch(
-          `https://cdn.jsdelivr.net/npm/zod@${version}/dist/esm/schemas.d.ts`
-        );
-        return await res.text();
-      }
       const res = await fetch(
-        `https://cdn.jsdelivr.net/npm/zod@${version}/lib/types.d.ts`
+        `https://data.jsdelivr.com/v1/packages/npm/zod@${version}`
       );
-      return await res.text();
+      const files: FileMeta[] = (await res.json()).files;
+      return getTypeFilePaths(files);
     },
     staleTime: 1000 * 60 * 60 * 24,
     refetchOnWindowFocus: false,
     refetchInterval: false,
     refetchOnMount: false,
+  });
+
+  const data = useQueries({
+    queries:
+      declarationPaths?.map((path) => ({
+        queryKey: ["zod-declaration", version, path],
+        queryFn: async () => {
+          const res = await fetch(
+            `https://cdn.jsdelivr.net/npm/zod@${version}/${path}`
+          );
+          return await res.text();
+        },
+        staleTime: 1000 * 60 * 60 * 24,
+        refetchOnWindowFocus: false,
+        refetchInterval: false,
+        refetchOnMount: false,
+      })) ?? [],
   });
 
   useEffect(() => {
@@ -55,7 +79,11 @@ export function ZodVersionProvider({ children }: { children: ReactNode }) {
       value={{
         version,
         isLoading,
-        declarations: declarations ?? "",
+        declarations:
+          data
+            ?.map((result) => result.data)
+            .filter(Boolean)
+            .join("\n") ?? "",
         versions: versions?.map((v) => v.version) ?? [],
         setVersion: setOverriddenVersion,
       }}
